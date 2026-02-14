@@ -10,6 +10,76 @@ let userData = {
     nearestPoint: null,
     verifiedLocation: false
 };
+// Recycling points in Astana (real addresses from 2GIS - December 2024)
+const recyclingPoints = [
+    // Пункты приема металла
+    { id: 1, name: "Пункт приема металла (ул. Кордай, 88)", lat: 51.0882, lon: 71.3945, types: ["metal"], hours: "09:00-18:00", rating: 4.9 },
+    { id: 2, name: "Дарын Металс (ул. Сакен Жунисов, 78а)", lat: 51.1452, lon: 71.4888, types: ["metal"], hours: "09:00-18:00", rating: 5.0 },
+    { id: 3, name: "МеталлоЗакуп (ул. Жанажол, 19Б)", lat: 51.1722, lon: 71.4235, types: ["metal"], hours: "09:00-18:00", rating: 3.9 },
+    { id: 4, name: "Пункт приема металла (ул. Шарбакты, 12/3г)", lat: 51.1125, lon: 71.3678, types: ["metal"], hours: "09:00-18:00", rating: 5.0 },
+    { id: 5, name: "Мир металла (ул. Шарбакты, 17)", lat: 51.1128, lon: 71.3685, types: ["metal"], hours: "09:00-18:00", rating: 4.8 },
+    { id: 6, name: "Пункт приема металла (ул. Орхон, 2)", lat: 51.0995, lon: 71.3812, types: ["metal"], hours: "09:00-18:00", rating: 3.5 },
+    { id: 7, name: "Пункт приема металла (ул. Фахд бен Абдул Азиз, 30)", lat: 51.1856, lon: 71.4125, types: ["metal"], hours: "09:00-18:00", rating: 4.6 },
+    { id: 8, name: "Пункт приема металла (ул. Караменде би Шакаулы, 12)", lat: 51.1235, lon: 71.3856, types: ["metal"], hours: "09:00-18:00", rating: 4.9 },
+    { id: 9, name: "Пункт приема металла (ул. Озбекали Жанибек, 1)", lat: 51.1658, lon: 71.3892, types: ["metal"], hours: "09:00-18:00", rating: 5.0 },
+    { id: 10, name: "Пункт прием металла (ул. Сакен Жунисов, 74а)", lat: 51.1448, lon: 71.4882, types: ["metal"], hours: "09:00-18:00", rating: 4.8 },
+    { id: 11, name: "Пункт приема металла (ул. Ушкопир, 3)", lat: 51.1756, lon: 71.3945, types: ["metal"], hours: "09:00-18:00", rating: 5.0 },
+    { id: 12, name: "Пункт приема металла (ул. Балкантау, 6)", lat: 51.1045, lon: 71.3725, types: ["metal"], hours: "09:00-18:00", rating: 4.3 },
+    { id: 13, name: "Пункт приема металла (ул. Озбекали Жанибек, 19)", lat: 51.1672, lon: 71.3905, types: ["metal"], hours: "09:00-18:00", rating: 3.7 },
+    { id: 14, name: "Пункт приема металла (ул. Шарбакты, 1)", lat: 51.1118, lon: 71.3665, types: ["metal"], hours: "09:00-18:00", rating: 5.0 },
+    { id: 15, name: "Максат (ул. Сакен Жунисов, 78)", lat: 51.1454, lon: 71.4890, types: ["metal"], hours: "09:00-18:00", rating: 4.7 },
+    { id: 16, name: "Пункт приема металла (ул. Мустафа Шокай, 103/1)", lat: 51.1892, lon: 71.4356, types: ["metal"], hours: "09:00-18:00", rating: 5.0 },
+    { id: 17, name: "КазМетКор (ул. Ушконыр, 1/2)", lat: 51.1752, lon: 71.3952, types: ["metal"], hours: "09:00-18:00", rating: 5.0 },
+    { id: 18, name: "Пункт приема металла (ул. Мустафа Шокай, 2/2)", lat: 51.1788, lon: 71.4298, types: ["metal"], hours: "09:00-18:00", rating: 4.8 },
+    
+    // Пункты приема вторсырья (бумага, пластик)
+    { id: 19, name: "AstanaQagazy (ул. Машхур Жусип Копейулы, 11/1)", lat: 51.1585, lon: 71.4112, types: ["paper"], hours: "09:00-18:00", rating: 4.5 },
+    { id: 20, name: "Адал Кагазы (пр. Абая, 99)", lat: 51.1456, lon: 71.4625, types: ["paper"], hours: "09:00-18:00", rating: 4.2 },
+    { id: 21, name: "LS Astana (ул. Телжан Шонанулы, 36/1а)", lat: 51.1142, lon: 71.3845, types: ["paper", "plastic", "glass"], hours: "09:00-18:00", rating: 3.4 },
+    { id: 22, name: "LS Astana (пр. Сарыарка, 31/1а)", lat: 51.1682, lon: 71.4045, types: ["paper", "plastic", "glass"], hours: "09:00-18:00", rating: 4.0 },
+    { id: 23, name: "LS Astana (ул. Манас, 11/4)", lat: 51.1625, lon: 71.4165, types: ["paper", "plastic", "glass"], hours: "09:00-18:00", rating: 4.3 },
+    { id: 24, name: "LS Astana (ул. Габидена Мустафина, 17/1)", lat: 51.1234, lon: 71.4562, types: ["paper", "plastic", "glass"], hours: "09:00-18:00", rating: 4.4 },
+    
+    // Likekomek (контейнеры для одежды и вещей)
+    { id: 25, name: "Likekomek (ул. Дулата Бабатайулы, 4а)", lat: 51.1385, lon: 71.4285, types: ["plastic", "paper"], hours: "24/7", rating: 4.9 },
+    { id: 26, name: "Likekomek (пр. Республики, 34/1)", lat: 51.1542, lon: 71.4678, types: ["plastic", "paper"], hours: "24/7", rating: 4.2 },
+    { id: 27, name: "Likekomek (ул. Аманжол Болекпаев, 19)", lat: 51.1712, lon: 71.4456, types: ["plastic", "paper"], hours: "24/7", rating: 4.0 },
+    { id: 28, name: "Likekomek (ул. Ахмет Байтурсынулы, 31)", lat: 51.1298, lon: 71.4125, types: ["plastic", "paper"], hours: "24/7", rating: 4.6 },
+    { id: 29, name: "Likekomek (пр. Туран, 55а)", lat: 51.1156, lon: 71.4345, types: ["plastic", "paper"], hours: "24/7", rating: 3.6 },
+    { id: 30, name: "Likekomek (пр. Тауелсиздик, 39)", lat: 51.1785, lon: 71.4512, types: ["plastic", "paper"], hours: "24/7", rating: 4.5 },
+    { id: 31, name: "Likekomek (ул. Ахмет Байтурсынулы, 39/3)", lat: 51.1305, lon: 71.4135, types: ["plastic", "paper"], hours: "24/7", rating: 4.3 },
+    { id: 32, name: "Likekomek (ул. Кенесары, 4)", lat: 51.1645, lon: 71.4145, types: ["plastic", "paper"], hours: "24/7", rating: 5.0 },
+    { id: 33, name: "Likekomek (ул. Сыганак, 17/10)", lat: 51.1445, lon: 71.4356, types: ["plastic", "paper"], hours: "24/7", rating: 5.0 },
+    { id: 34, name: "Likekomek (ул. Куйши Дина, 23/3)", lat: 51.1125, lon: 71.4245, types: ["plastic", "paper"], hours: "24/7", rating: 5.0 },
+    { id: 35, name: "Likekomek (ул. Ыкылас Дукенулы, 31)", lat: 51.1856, lon: 71.4625, types: ["plastic", "paper"], hours: "24/7", rating: 5.0 },
+    { id: 36, name: "Likekomek (пр. Сарыарка, 31/2)", lat: 51.1685, lon: 71.4048, types: ["plastic", "paper"], hours: "24/7", rating: 3.0 },
+    { id: 37, name: "Likekomek (пр. Абылай хана, 31)", lat: 51.1518, lon: 71.4282, types: ["plastic", "paper"], hours: "24/7", rating: 4.5 },
+    { id: 38, name: "Likekomek (пр. Тауелсиздик, 48)", lat: 51.1795, lon: 71.4525, types: ["plastic", "paper"], hours: "24/7", rating: 4.2 },
+    
+    // Freedom - фандоматы (пластиковые бутылки)
+    { id: 39, name: "Freedom (ТРЦ Asia Park, пр. Кабанбай батыр, 21)", lat: 51.1612, lon: 71.4412, types: ["plastic"], hours: "10:00-22:00", rating: 1.0 },
+    { id: 40, name: "Freedom (ЕНУ, ул. Кажымукан, 13)", lat: 51.0922, lon: 71.4068, types: ["plastic"], hours: "08:00-20:00", rating: 3.1 },
+    { id: 41, name: "Freedom (ул. Кордай, 6)", lat: 51.0875, lon: 71.3925, types: ["plastic"], hours: "09:00-18:00", rating: 3.0 },
+    { id: 42, name: "Freedom (шоссе Коргалжын, 13д)", lat: 51.0825, lon: 71.3815, types: ["plastic"], hours: "09:00-18:00", rating: 3.5 },
+    
+    // Sparklo - пункты приема пластика
+    { id: 43, name: "Sparklo (ул. Динмухамед Конаев, 10)", lat: 51.1285, lon: 71.4298, types: ["plastic"], hours: "09:00-18:00", rating: 1.7 },
+    
+    // Социальные магазины
+    { id: 44, name: "Алғыс (ул. Сауран, 14)", lat: 51.1125, lon: 71.4156, types: ["plastic", "paper"], hours: "09:00-18:00", rating: 3.2 },
+    
+    // Пункты приема катализаторов
+    { id: 45, name: "AG Vyhlop (ул. Жетиген, 35/3)", lat: 51.1685, lon: 71.4892, types: ["metal"], hours: "09:00-18:00", rating: 4.9 },
+    { id: 46, name: "Ast.cat (ул. Александра Пушкина, 24)", lat: 51.1312, lon: 71.4385, types: ["metal"], hours: "09:00-18:00", rating: 4.8 },
+    { id: 47, name: "Vihlopnaya.01 (ул. Акыртас, 1)", lat: 51.1045, lon: 71.3956, types: ["metal"], hours: "09:00-18:00", rating: 5.0 },
+    
+    // Ящики для сбора вещей
+    { id: 48, name: "Ящик для сбора вещей (ТРЦ Аружан, ул. Илияса Жансугурова, 8/1)", lat: 51.1425, lon: 71.4645, types: ["plastic", "paper"], hours: "10:00-22:00", rating: 4.0 },
+    
+    // Торговые центры (дополнительно)
+    { id: 49, name: "Mega Silk Way", lat: 51.1282, lon: 71.4306, types: ["plastic", "glass", "paper"], hours: "10:00-22:00", rating: 4.6 },
+    { id: 50, name: "Khan Shatyr", lat: 51.1327, lon: 71.4062, types: ["plastic", "paper"], hours: "10:00-22:00", rating: 4.5 },
+];
 
 
 // Leaderboard data
